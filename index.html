@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quán Net MMO</title>
+  <style>
+    /* Reset + font */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      background: #050505;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* LED border */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      padding: 5px;
+      background: linear-gradient(270deg, #ff0080, #ff8c00, #40e0d0, #ff0080);
+      background-size: 800% 800%;
+      animation: ledBorder 12s linear infinite;
+      z-index: 9999;
+      -webkit-mask: 
+        linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+    }
+    @keyframes ledBorder {
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Hiệu ứng nền động */
+    #stars, #shootingStars, #fireflies {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: -1;
+    }
+
+    /* Banner */
+    header {
+      text-align: center;
+      padding: 50px 20px 20px;
+    }
+    header h1 {
+      font-size: 3rem;
+      color: #fff;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff00de, 0 0 20px #00f0ff, 0 0 40px #ff00de;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff00de, 0 0 20px #00f0ff; }
+      to { text-shadow: 0 0 20px #00f0ff, 0 0 40px #ff00de; }
+    }
+    header p {
+      font-size: 0.9rem;
+      margin-top: 5px;
+      color: #aaa;
+    }
+
+    /* Card sản phẩm */
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(20,20,20,0.8);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 0 25px #ff00de;
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #ffccff;
+      text-shadow: 0 0 5px #ff00de;
+    }
+    .card a {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: linear-gradient(45deg,#ff00de,#00f0ff);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 25px;
+      box-shadow: 0 0 10px #ff00de;
+      transition: 0.3s;
+    }
+    .card a:hover {
+      box-shadow: 0 0 20px #00f0ff, 0 0 40px #ff00de;
+    }
+
+    /* Chat bubble */
+    .chat-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ff00de, #00f0ff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #ff00de;
+      animation: pulse 2s infinite;
+      z-index: 10000;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px #ff00de, 0 0 10px #00f0ff; }
+      50% { box-shadow: 0 0 20px #ff00de, 0 0 40px #00f0ff; }
+      100% { box-shadow: 0 0 5px #ff00de, 0 0 10px #00f0ff; }
+    }
+    .chat-box {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: rgba(20,20,20,0.95);
+      border-radius: 15px;
+      padding: 20px;
+      width: 250px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 0 20px #ff00de;
+      animation: fadeIn 0.5s ease;
+    }
+    .chat-box h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #00f0ff;
+    }
+    .chat-link {
+      background: linear-gradient(45deg,#ff00de,#00f0ff);
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .chat-link:hover {
+      box-shadow: 0 0 20px #00f0ff;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Nền động -->
+  <canvas id="stars"></canvas>
+  <canvas id="shootingStars"></canvas>
+  <canvas id="fireflies"></canvas>
+
+  <header>
+    <h1>Quán Net MMO</h1>
+    <p>Admin: VIEHOAGG</p>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>Tool được viết hoàn toàn bằng ngôn ngữ Python</h2>
+      <a href="https://forms.gle/xdmHTZrgjMi425fs5" target="_blank">Mua tại đây</a>
+    </div>
+    <div class="card">
+      <h2>Game Mod dành cho Android và iOS</h2>
+      <a href="https://forms.gle/8bPcbJqv56ftqqGp7" target="_blank">Mua tại đây</a>
+    </div>
+    <div class="card">
+      <h2>Tài khoản mạng xã hội Very Nice, TTT</h2>
+      <a href="https://forms.gle/jvmyKxeBRREGfbBv9" target="_blank">Mua tại đây</a>
+    </div>
+    <div class="card">
+      <h2>Tut Unlock Acc & Rip Acc</h2>
+      <a href="https://forms.gle/sWYSi6m9vKz3UQsj6" target="_blank">Mua tại đây</a>
+    </div>
+    <div class="card">
+      <h2>Tài liệu MMO chất lượng cao</h2>
+      <a href="https://forms.gle/1wuKPMzzSxwLKs6y5" target="_blank">Mua tại đây</a>
+    </div>
+  </main>
+
+  <!-- Chat button -->
+  <div class="chat-btn" onclick="toggleChat()">💬</div>
+  <div class="chat-box" id="chatBox">
+    <h3>Liên hệ Admin qua</h3>
+    <a class="chat-link" href="https://zalo.me/0973550349" target="_blank">📱 Zalo</a>
+    <a class="chat-link" href="https://t.me/hoangdz" target="_blank">💬 Telegram</a>
+  </div>
+
+  <script>
+    function toggleChat() {
+      const chatBox = document.getElementById("chatBox");
+      chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+    }
+
+    // Hiệu ứng sao tĩnh
+    const stars = document.getElementById("stars");
+    const ctxStars = stars.getContext("2d");
+    stars.width = window.innerWidth;
+    stars.height = window.innerHeight;
+    for (let i = 0; i < 200; i++) {
+      ctxStars.fillStyle = "#fff";
+      ctxStars.beginPath();
+      ctxStars.arc(Math.random() * stars.width, Math.random() * stars.height, Math.random() * 1.2, 0, Math.PI * 2);
+      ctxStars.fill();
+    }
+
+    // Hiệu ứng sao băng
+    const shooting = document.getElementById("shootingStars");
+    const ctxShoot = shooting.getContext("2d");
+    shooting.width = window.innerWidth;
+    shooting.height = window.innerHeight;
+    function shootingStar() {
+      ctxShoot.clearRect(0, 0, shooting.width, shooting.height);
+      const x = Math.random() * shooting.width;
+      const y = Math.random() * shooting.height / 2;
+      ctxShoot.strokeStyle = "#fff";
+      ctxShoot.beginPath();
+      ctxShoot.moveTo(x, y);
+      ctxShoot.lineTo(x + 150, y + 50);
+      ctxShoot.stroke();
+      setTimeout(shootingStar, 2000);
+    }
+    shootingStar();
+
+    // Hiệu ứng đom đóm (fireflies)
+    const fireflies = document.getElementById("fireflies");
+    const ctxFire = fireflies.getContext("2d");
+    fireflies.width = window.innerWidth;
+    fireflies.height = window.innerHeight;
+    const flies = Array.from({ length: 20 }, () => ({
+      x: Math.random() * fireflies.width,
+      y: Math.random() * fireflies.height,
+      r: Math.random() * 3 + 2,
+      dx: Math.random() * 2 - 1,
+      dy: Math.random() * 2 - 1
+    }));
+    function animateFireflies() {
+      ctxFire.clearRect(0, 0, fireflies.width, fireflies.height);
+      flies.forEach(f => {
+        ctxFire.beginPath();
+        ctxFire.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        ctxFire.fillStyle = "rgba(255,255,100,0.8)";
+        ctxFire.fill();
+        f.x += f.dx;
+        f.y += f.dy;
+        if (f.x < 0 || f.x > fireflies.width) f.dx *= -1;
+        if (f.y < 0 || f.y > fireflies.height) f.dy *= -1;
+      });
+      requestAnimationFrame(animateFireflies);
+    }
+    animateFireflies();
+  </script>
+</body>
+</html>
